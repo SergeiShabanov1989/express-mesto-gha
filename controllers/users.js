@@ -6,27 +6,43 @@ module.exports.getUsers = async (req, res) => {
 };
 
 module.exports.getUserById = async (req, res) => {
-  const user = await User.findById(req.params.userId)
-  res.send(user)
+  try {
+    const user = await User.findById(req.params.userId)
+    res.send(user)
+  } catch (err) {
+    res.status(404).send({message: "Запрашиваемый пользователь не найден"})
+  }
 };
 
 module.exports.createUser = async (req, res) => {
-  const { name, about, avatar } = req.body;
+  try {
+    const { name, about, avatar } = req.body;
 
-  const newUser = await User.create({ name, about, avatar })
-  res.send(newUser)
+    const newUser = await User.create({ name, about, avatar })
+    res.send(newUser)
+  } catch (err) {
+    res.status(400).send({message: "Переданы некорректные данные при создании пользователя"})
+  }
 };
 
 module.exports.updateUserInfo = async (req, res) => {
-  const { name, about } = req.body;
+  try {
+    const { name, about } = req.body;
 
-  const user = await User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-  res.send(user)
+    const user = await User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+    res.send(user)
+  } catch (err) {
+    res.status(400).send({message: "Переданы некорректные данные при обновлении профиля"})
+  }
 };
 
 module.exports.updateUserAvatar = async (req, res) => {
-  const { avatar } = req.body;
+  try {
+    const { avatar } = req.body;
 
-  const user = await User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
-  res.send(user)
+    const user = await User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+    res.send(user)
+  } catch (err) {
+    res.status(400).send({message: "Переданы некорректные данные при обновлении аватара."})
+  }
 };
