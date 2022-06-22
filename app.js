@@ -18,6 +18,10 @@ app.use((req, res, next) => {
 
 app.use('/users', require('./routes/users'))
 app.use('/cards', require('./routes/cards'))
+app.use('*', (req, res) => {
+  Promise.reject(new Error('Ошибка'))
+    .catch(() => res.status(404).send({message: "Неверно указан путь"}))
+})
 
 async function main() {
   try {
