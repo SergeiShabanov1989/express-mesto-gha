@@ -10,13 +10,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '5d8b8592978f8bd833ca8133' // вставьте сюда _id созданного в предыдущем пункте пользователя
+    _id: '62b2e6955d76ee60e14dc17e'
   };
 
   next();
 });
 
 app.use('/users', require('./routes/users'))
+app.use('/cards', require('./routes/cards'))
 
 async function main() {
   try {
