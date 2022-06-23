@@ -43,7 +43,7 @@ module.exports.likeCard = async (req, res) => {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     )
       .orFail(() => new Error('Not Found'));
     res.status(200).send(card);
@@ -65,7 +65,7 @@ module.exports.dislikeCard = async (req, res) => {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     )
       .orFail(() => new Error('Not Found'));
     res.send(card);

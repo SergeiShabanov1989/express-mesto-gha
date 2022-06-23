@@ -45,7 +45,7 @@ module.exports.updateUserInfo = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { name, about },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
     res.status(200).send(user);
   } catch (err) {
@@ -64,7 +64,7 @@ module.exports.updateUserAvatar = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { avatar },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
     res.status(200).send(user);
   } catch (err) {

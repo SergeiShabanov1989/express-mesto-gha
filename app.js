@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '62b2e6955d76ee60e14dc17e'
+    _id: '62b2e6955d76ee60e14dc17e',
   };
 
   next();
@@ -18,6 +18,7 @@ app.use((req, res, next) => {
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
 app.use('*', (req, res) => {
   Promise.reject(new Error('Ошибка!'))
     .catch(() => res.status(404).send({ message: "Запрашиваемая страница не найдена" }));
