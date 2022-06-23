@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { NOT_FOUND } = require('./utils/utils');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -19,13 +20,16 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use('*', (req, res) => {
-  Promise.reject(new Error('Ошибка!'))
-    .catch(() => res.status(404).send({ message: "Запрашиваемая страница не найдена" }));
+app.use((req, res) => {
+  res.status(NOT_FOUND).send({ message: "Запрашиваемая страница не найдена" });
 });
 
 async function main() {
-  await mongoose.connect('mongodb://localhost:27017/mestodb');
+  try {
+    await mongoose.connect('mongodb://localhost:27017/mestodb');
+  } catch (err) {
+    throw new Error(err);
+  }
   app.listen(PORT);
 }
 
