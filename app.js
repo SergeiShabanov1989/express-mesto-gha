@@ -16,23 +16,16 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/users', require('./routes/users'))
-app.use('/cards', require('./routes/cards'))
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
 app.use('*', (req, res) => {
   Promise.reject(new Error('Ошибка!'))
-    .catch(() => res.status(404).send({message: "Запрашиваемая страница не найдена"}))
-})
+    .catch(() => res.status(404).send({ message: "Запрашиваемая страница не найдена" }));
+});
 
 async function main() {
-  try {
-    await mongoose.connect('mongodb://localhost:27017/mestodb');
-  } catch (err) {
-    console.log(err.message)
-  }
-
-  app.listen(PORT, () => {
-    console.log('Процесс пошел');
-  });
+  await mongoose.connect('mongodb://localhost:27017/mestodb');
+  app.listen(PORT);
 }
 
 main();
