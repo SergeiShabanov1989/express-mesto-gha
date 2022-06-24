@@ -12,7 +12,7 @@ module.exports.getCards = async (req, res) => {
     const cards = await Card.find({});
     res.status(OK).send(cards);
   } catch (err) {
-    res.status(ERROR).send({ message: "Ошибка по умолчанию" });
+    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };
 
@@ -24,10 +24,10 @@ module.exports.createCard = async (req, res) => {
     res.status(CREATED).send(newCard);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(BAD_REQUEST).send({ message: "Переданы некорректные данные при создании карточки" });
+      res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' });
       return;
     }
-    res.status(ERROR).send({ message: "Ошибка по умолчанию" });
+    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };
 
@@ -38,14 +38,14 @@ module.exports.deleteCard = async (req, res) => {
     res.status(OK).send(card);
   } catch (err) {
     if (err.message === 'Not Found') {
-      res.status(NOT_FOUND).send({ message: "Запрашиваемая карточка не найдена" });
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемая карточка не найдена' });
       return;
     }
     if (err.name === 'CastError') {
-      res.status(BAD_REQUEST).send({ message: "Некорректно передан id" });
+      res.status(BAD_REQUEST).send({ message: 'Некорректно передан id' });
       return;
     }
-    res.status(ERROR).send({ message: "Ошибка по умолчанию" });
+    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };
 
@@ -60,14 +60,14 @@ module.exports.likeCard = async (req, res) => {
     res.status(OK).send(card);
   } catch (err) {
     if (err.message === 'Not Found') {
-      res.status(NOT_FOUND).send({ message: "Запрашиваемая карточка не найдена" });
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемая карточка не найдена' });
       return;
     }
     if (err.name === 'CastError') {
-      res.status(BAD_REQUEST).send({ message: "Некорректно передан id" });
+      res.status(BAD_REQUEST).send({ message: 'Некорректно передан id' });
       return;
     }
-    res.status(ERROR).send({ message: "Ошибка по умолчанию" });
+    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };
 
@@ -82,13 +82,13 @@ module.exports.dislikeCard = async (req, res) => {
     res.status(OK).send(card);
   } catch (err) {
     if (err.message === 'Not Found') {
-      res.status(NOT_FOUND).send({ message: "Запрашиваемая карточка не найдена" });
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемая карточка не найдена' });
       return;
     }
     if (err.name === 'CastError') {
-      res.status(BAD_REQUEST).send({ message: "Некорректно передан id" });
+      res.status(BAD_REQUEST).send({ message: 'Некорректно передан id' });
       return;
     }
-    res.status(ERROR).send({ message: "Ошибка по умолчанию" });
+    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };

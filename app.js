@@ -21,7 +21,7 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: "Запрашиваемая страница не найдена" });
+  res.status(NOT_FOUND).send({ message: 'Запрашиваемая страница не найдена' });
 });
 
 async function main() {
