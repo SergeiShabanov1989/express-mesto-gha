@@ -112,22 +112,29 @@ module.exports.login = async (req, res) => {
     const user = await User.findOne({ email })
       .then((user) => {
         if (!user) {
-          return Promise.reject(new Error('Неправильный email или пароль'));
+          const err = new Error('Неправильный email или пароль');
+          err.statusCode = 401;
+          throw err;
         }
         return Promise.all([
           user,
           bcrypt.compare(password, user.password)
         ]);
       })
-      .then((matched) => {
+      .then(([user, matched]) => {
         if (!matched) {
-          return Promise.reject(new Error('Неправильный email или пароль'));
+          const err = new Error('Неправильный email или пароль');
+          err.statusCode = 401;
+          throw err;
         }
-        return jwt.sign({ _id: user._id }, 'some-secret-key')
+        return jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      })
+      .then((token) => {
+        res.send(token);
       });
   } catch (err) {
-    if (err.message === 'Not Found') {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' });
+    if (err.statusCode === 401) {
+      res.status(401).send({ message: err.message });
       return;
     }
     res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
