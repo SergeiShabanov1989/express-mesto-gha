@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
 const {
   BAD_REQUEST,
   NOT_FOUND,
@@ -36,10 +39,17 @@ module.exports.getUserById = async (req, res) => {
 
 module.exports.createUser = async (req, res) => {
   try {
-    const { name, about, avatar } = req.body;
-
-    const newUser = await User.create({ name, about, avatar });
-    res.status(CREATED).send(newUser);
+    await bcrypt.hash(req.body.password, 10)
+      .then((hash) => User.create({
+        name: req.body.name,
+        about: req.body.about,
+        avatar: req.body.avatar,
+        email: req.body.email,
+        password: hash,
+      }))
+      .then((user) => {
+        res.status(CREATED).send(user);
+      });
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
@@ -87,6 +97,35 @@ module.exports.updateUserAvatar = async (req, res) => {
       res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении аватара' });
       return;
     }
+    if (err.message === 'Not Found') {
+      res.status(NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' });
+      return;
+    }
+    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
+  }
+};
+
+module.exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email })
+      .then((user) => {
+        if (!user) {
+          return Promise.reject(new Error('Неправильный email или пароль'));
+        }
+        return Promise.all([
+          user,
+          bcrypt.compare(password, user.password)
+        ]);
+      })
+      .then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error('Неправильный email или пароль'));
+        }
+        return jwt.sign({ _id: user._id }, 'some-secret-key')
+      });
+  } catch (err) {
     if (err.message === 'Not Found') {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' });
       return;
