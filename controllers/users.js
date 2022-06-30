@@ -109,7 +109,7 @@ module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email })
+    await User.findOne({ email })
       .then((user) => {
         if (!user) {
           const err = new Error('Неправильный email или пароль');
