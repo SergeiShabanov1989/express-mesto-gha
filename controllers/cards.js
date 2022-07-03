@@ -5,6 +5,7 @@ const {
   ERROR,
   OK,
   CREATED,
+  FORBIDDEN,
 } = require('../utils/utils');
 
 module.exports.getCards = async (req, res) => {
@@ -33,9 +34,14 @@ module.exports.createCard = async (req, res) => {
 
 module.exports.deleteCard = async (req, res) => {
   try {
-    const card = await Card.findByIdAndRemove(req.params.cardId)
+    const card = await Card.findById(req.params.cardId)
       .orFail(() => new Error('Not Found'));
-    res.status(OK).send(card);
+    if (req.user._id === card.owner.toString()) {
+      return Card.findByIdAndRemove(card._id)
+        .orFail(() => new Error('Bad Request'))
+        .then((deletedCard) => res.status(OK).send(deletedCard));
+    }
+    return res.status(FORBIDDEN).send({ error: 'Нет доступа' });
   } catch (err) {
     if (err.message === 'Not Found') {
       res.status(NOT_FOUND).send({ message: 'Запрашиваемая карточка не найдена' });

@@ -109,7 +109,7 @@ module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    await User.findOne({ email })
+    await User.findOne({ email }).select('+password')
       .then((user) => {
         if (!user) {
           const err = new Error('Неправильный email или пароль');
@@ -118,7 +118,7 @@ module.exports.login = async (req, res) => {
         }
         return Promise.all([
           user,
-          bcrypt.compare(password, user.password)
+          bcrypt.compare(password, user.password),
         ]);
       })
       .then(([user, matched]) => {
@@ -132,6 +132,19 @@ module.exports.login = async (req, res) => {
       .then((token) => {
         res.send(token);
       });
+  } catch (err) {
+    if (err.statusCode === 401) {
+      res.status(401).send({ message: err.message });
+      return;
+    }
+    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
+  }
+};
+
+module.exports.getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.status(OK).send(user);
   } catch (err) {
     if (err.statusCode === 401) {
       res.status(401).send({ message: err.message });
