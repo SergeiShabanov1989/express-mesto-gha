@@ -141,10 +141,20 @@ module.exports.login = async (req, res, next) => {
           error.statusCode = UNAUTHORIZED;
           next(error);
         }
-        return jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+        // res.status(OK).send(user);
+        // return jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+        return Promise.all([
+          user,
+          jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }),
+        ]);
       })
-      .then((token) => {
-        res.send(token);
+      .then(([user, token]) => {
+        res.status(OK).send(
+          {
+            user,
+            token,
+          },
+        );
       });
   } catch (err) {
     if (err.statusCode === 401) {
