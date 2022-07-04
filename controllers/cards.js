@@ -2,7 +2,6 @@ const Card = require('../models/card');
 const {
   BAD_REQUEST,
   NOT_FOUND,
-  ERROR,
   OK,
   CREATED,
   FORBIDDEN,
@@ -48,6 +47,7 @@ module.exports.deleteCard = async (req, res, next) => {
             .then((deletedCard) => res.status(OK).send(deletedCard))
             .catch((err) => res.status(404).send({ error: err.message }));
         }
+        return null;
       });
     return res.status(FORBIDDEN).send({ error: 'Нет доступа' });
   } catch (err) {
@@ -62,6 +62,7 @@ module.exports.deleteCard = async (req, res, next) => {
       next(error);
     }
   }
+  return null;
 };
 
 module.exports.likeCard = async (req, res, next) => {

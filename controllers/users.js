@@ -5,7 +5,6 @@ const User = require('../models/user');
 const {
   BAD_REQUEST,
   NOT_FOUND,
-  ERROR,
   OK,
   CREATED,
   CONFLICT,
@@ -60,7 +59,7 @@ module.exports.createUser = async (req, res, next) => {
       next(error);
     }
     if (err.code === 11000) {
-      const error = new Error('Переданы некорректные данные при создании пользователя');
+      const error = new Error('Такой email уже зарегистрирован');
       error.statusCode = CONFLICT;
       next(error);
     }
@@ -123,7 +122,7 @@ module.exports.login = async (req, res, next) => {
       .then((user) => {
         if (!user) {
           const error = new Error('Неправильный email или пароль');
-          error.statusCode = 401;
+          error.statusCode = BAD_REQUEST;
           next(error);
         }
         return Promise.all([
@@ -134,7 +133,7 @@ module.exports.login = async (req, res, next) => {
       .then(([user, matched]) => {
         if (!matched) {
           const error = new Error('Неправильный email или пароль');
-          error.statusCode = 401;
+          error.statusCode = BAD_REQUEST;
           next(error);
         }
         return jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
@@ -144,9 +143,8 @@ module.exports.login = async (req, res, next) => {
       });
   } catch (err) {
     if (err.statusCode === 401) {
-      res.status(401).send({ message: err.message });
       const error = new Error('Вы не авторизованы');
-      error.statusCode = 401;
+      error.statusCode = UNAUTHORIZED;
       next(error);
     }
   }
