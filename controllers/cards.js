@@ -8,16 +8,21 @@ const {
   FORBIDDEN,
 } = require('../utils/utils');
 
+// module.exports.getCards = async (req, res) => {
+//   try {
+//     const cards = await Card.find({});
+//     res.status(OK).send(cards);
+//   } catch (err) {
+//     res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
+//   }
+// };
+
 module.exports.getCards = async (req, res) => {
-  try {
-    const cards = await Card.find({});
-    res.status(OK).send(cards);
-  } catch (err) {
-    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
-  }
+  const cards = await Card.find({});
+  res.status(OK).send(cards);
 };
 
-module.exports.createCard = async (req, res) => {
+module.exports.createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
 
@@ -25,37 +30,41 @@ module.exports.createCard = async (req, res) => {
     res.status(CREATED).send(newCard);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании карточки' });
-      return;
+      const error = new Error('Переданы некорректные данные при создании карточки');
+      error.statusCode = BAD_REQUEST;
+      next(error);
     }
-    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };
 
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
   try {
-    const card = await Card.findById(req.params.cardId)
-      .orFail(() => new Error('Not Found'));
-    if (req.user._id === card.owner.toString()) {
-      return Card.findByIdAndRemove(card._id)
-        .orFail(() => new Error('Bad Request'))
-        .then((deletedCard) => res.status(OK).send(deletedCard));
-    }
+    await Card.findById(req.params.cardId)
+      .orFail(() => new Error('Not Found'))
+      .then((card) => {
+        if (req.user._id === card.owner.toString()) {
+          return Card.findByIdAndRemove(card._id)
+            .orFail(() => new Error('Что-то пошло не так'))
+            .then((deletedCard) => res.status(OK).send(deletedCard))
+            .catch((err) => res.status(404).send({ error: err.message }));
+        }
+      });
     return res.status(FORBIDDEN).send({ error: 'Нет доступа' });
   } catch (err) {
     if (err.message === 'Not Found') {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемая карточка не найдена' });
-      return;
+      const error = new Error('Запрашиваемая карточка не найдена');
+      error.statusCode = NOT_FOUND;
+      next(error);
     }
     if (err.name === 'CastError') {
-      res.status(BAD_REQUEST).send({ message: 'Некорректно передан id' });
-      return;
+      const error = new Error('Некорректно передан id');
+      error.statusCode = BAD_REQUEST;
+      next(error);
     }
-    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };
 
-module.exports.likeCard = async (req, res) => {
+module.exports.likeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -66,18 +75,19 @@ module.exports.likeCard = async (req, res) => {
     res.status(OK).send(card);
   } catch (err) {
     if (err.message === 'Not Found') {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемая карточка не найдена' });
-      return;
+      const error = new Error('Запрашиваемая карточка не найдена');
+      error.statusCode = NOT_FOUND;
+      next(error);
     }
     if (err.name === 'CastError') {
-      res.status(BAD_REQUEST).send({ message: 'Некорректно передан id' });
-      return;
+      const error = new Error('Некорректно передан id');
+      error.statusCode = BAD_REQUEST;
+      next(error);
     }
-    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };
 
-module.exports.dislikeCard = async (req, res) => {
+module.exports.dislikeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -88,13 +98,14 @@ module.exports.dislikeCard = async (req, res) => {
     res.status(OK).send(card);
   } catch (err) {
     if (err.message === 'Not Found') {
-      res.status(NOT_FOUND).send({ message: 'Запрашиваемая карточка не найдена' });
-      return;
+      const error = new Error('Запрашиваемая карточка не найдена');
+      error.statusCode = NOT_FOUND;
+      next(error);
     }
     if (err.name === 'CastError') {
-      res.status(BAD_REQUEST).send({ message: 'Некорректно передан id' });
-      return;
+      const error = new Error('Некорректно передан id');
+      error.statusCode = BAD_REQUEST;
+      next(error);
     }
-    res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
   }
 };

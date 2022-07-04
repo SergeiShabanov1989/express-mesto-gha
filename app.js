@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { NOT_FOUND } = require('./utils/utils');
+const { NOT_FOUND, ERROR } = require('./utils/utils');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -34,3 +34,12 @@ async function main() {
 }
 
 main();
+
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    return res.status(err.statusCode).send({ message: err.message });
+  }
+
+  console.error(err.stack);
+  res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
+});
