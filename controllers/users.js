@@ -50,7 +50,12 @@ module.exports.createUser = async (req, res, next) => {
         password: hash,
       }))
       .then((user) => {
-        res.status(CREATED).send(user);
+        res.status(CREATED).send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        });
       });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -122,7 +127,7 @@ module.exports.login = async (req, res, next) => {
       .then((user) => {
         if (!user) {
           const error = new Error('Неправильный email или пароль');
-          error.statusCode = BAD_REQUEST;
+          error.statusCode = UNAUTHORIZED;
           next(error);
         }
         return Promise.all([
@@ -133,7 +138,7 @@ module.exports.login = async (req, res, next) => {
       .then(([user, matched]) => {
         if (!matched) {
           const error = new Error('Неправильный email или пароль');
-          error.statusCode = BAD_REQUEST;
+          error.statusCode = UNAUTHORIZED;
           next(error);
         }
         return jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
