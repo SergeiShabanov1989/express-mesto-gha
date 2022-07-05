@@ -2,7 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
-const { NOT_FOUND, ERROR } = require('./utils/utils');
+const { ERROR } = require('./utils/utils');
+const { REGEX_URL } = require('./utils/utils');
+const NotFoundError = require('./errors/not-found-err');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -23,7 +25,7 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(/(https?:\/\/|ftps?:\/\/|www\.)((?![.,?!;:()]*(\s|$))[^\s]){2,}/),
+    avatar: REGEX_URL,
     email: Joi.string().required().email().min(1),
     password: Joi.string().required().min(1),
   }),
@@ -34,8 +36,8 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Запрашиваемая страница не найдена' });
+app.use((req, res, next) => {
+  next(new NotFoundError('Запрашиваемая страница не найдена'));
 });
 
 async function main() {

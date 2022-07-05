@@ -2,14 +2,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  OK,
-  CREATED,
-  CONFLICT,
-  UNAUTHORIZED,
-} = require('../utils/utils');
+const { OK, CREATED } = require('../utils/utils');
+const NotFoundError = require('../errors/not-found-err');
+const BadRequest = require('../errors/bad-request-err');
+const ConflictError = require('../errors/conflict-err');
+const UnauthorizedError = require('../errors/unauthorized-err');
 
 module.exports.getUsers = async (req, res, next) => {
   try {
@@ -27,16 +24,14 @@ module.exports.getUserById = async (req, res, next) => {
     res.status(OK).send(user);
   } catch (err) {
     if (err.message === 'Not Found') {
-      const error = new Error('Запрашиваемый пользователь не найден');
-      error.statusCode = NOT_FOUND;
-      next(error);
+      return next(new NotFoundError('Запрашиваемый пользователь не найден'));
     }
     if (err.name === 'CastError') {
-      const error = new Error('Некорректно передан id');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      return next(new BadRequest('Некорректно передан id'));
     }
+    next(err);
   }
+  return null;
 };
 
 module.exports.createUser = async (req, res, next) => {
@@ -59,16 +54,14 @@ module.exports.createUser = async (req, res, next) => {
       });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      const error = new Error('Переданы некорректные данные при создании пользователя');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      return next(new BadRequest('Переданы некорректные данные при создании пользователя'));
     }
     if (err.code === 11000) {
-      const error = new Error('Такой email уже зарегистрирован');
-      error.statusCode = CONFLICT;
-      next(error);
+      return next(new ConflictError('Такой email уже зарегистрирован'));
     }
+    next(err);
   }
+  return null;
 };
 
 module.exports.updateUserInfo = async (req, res, next) => {
@@ -83,16 +76,14 @@ module.exports.updateUserInfo = async (req, res, next) => {
     res.status(OK).send(user);
   } catch (err) {
     if (err.name === 'ValidationError' || err.name === 'CastError') {
-      const error = new Error('Переданы некорректные данные при обновлении профиля');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      return next(new BadRequest('Переданы некорректные данные при обновлении профиля'));
     }
     if (err.message === 'Not Found') {
-      const error = new Error('Запрашиваемый пользователь не найден');
-      error.statusCode = NOT_FOUND;
-      next(error);
+      return next(new NotFoundError('Запрашиваемый пользователь не найден'));
     }
+    next(err);
   }
+  return null;
 };
 
 module.exports.updateUserAvatar = async (req, res, next) => {
@@ -107,16 +98,14 @@ module.exports.updateUserAvatar = async (req, res, next) => {
     res.status(OK).send(user);
   } catch (err) {
     if (err.name === 'ValidationError' || err.name === 'CastError') {
-      const error = new Error('Переданы некорректные данные при обновлении аватара');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      return next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
     }
     if (err.message === 'Not Found') {
-      const error = new Error('Запрашиваемый пользователь не найден');
-      error.statusCode = NOT_FOUND;
-      next(error);
+      return next(new NotFoundError('Запрашиваемый пользователь не найден'));
     }
+    next(err);
   }
+  return null;
 };
 
 module.exports.login = async (req, res, next) => {
@@ -126,9 +115,7 @@ module.exports.login = async (req, res, next) => {
     await User.findOne({ email }).select('+password')
       .then((user) => {
         if (!user) {
-          const error = new Error('Неправильный email или пароль');
-          error.statusCode = UNAUTHORIZED;
-          next(error);
+          return next(new UnauthorizedError('Неправильный email или пароль'));
         }
         return Promise.all([
           user,
@@ -137,9 +124,7 @@ module.exports.login = async (req, res, next) => {
       })
       .then(([user, matched]) => {
         if (!matched) {
-          const error = new Error('Неправильный email или пароль');
-          error.statusCode = UNAUTHORIZED;
-          next(error);
+          return next(new UnauthorizedError('Неправильный email или пароль'));
         }
         return Promise.all([
           user,
@@ -156,11 +141,11 @@ module.exports.login = async (req, res, next) => {
       });
   } catch (err) {
     if (err.statusCode === 401) {
-      const error = new Error('Вы не авторизованы');
-      error.statusCode = UNAUTHORIZED;
-      next(error);
+      return next(new UnauthorizedError('Вы не авторизованы'));
     }
+    next(err);
   }
+  return null;
 };
 
 module.exports.getUser = async (req, res, next) => {

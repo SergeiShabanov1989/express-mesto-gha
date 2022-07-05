@@ -1,15 +1,16 @@
 const Card = require('../models/card');
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  OK,
-  CREATED,
-  FORBIDDEN,
-} = require('../utils/utils');
+const { OK, CREATED } = require('../utils/utils');
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-err');
+const ForbiddenError = require('../errors/forbidden-err');
 
-module.exports.getCards = async (req, res) => {
-  const cards = await Card.find({});
-  res.status(OK).send(cards);
+module.exports.getCards = async (req, res, next) => {
+  try {
+    const cards = await Card.find({});
+    res.status(OK).send(cards);
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports.createCard = async (req, res, next) => {
@@ -20,9 +21,7 @@ module.exports.createCard = async (req, res, next) => {
     res.status(CREATED).send(newCard);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      const error = new Error('Переданы некорректные данные при создании карточки');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      next(new BadRequestError('Переданы некорректные данные при создании карточки'));
     }
   }
 };
@@ -36,21 +35,17 @@ module.exports.deleteCard = async (req, res, next) => {
           return Card.findByIdAndRemove(card._id)
             .orFail(() => new Error('Что-то пошло не так'))
             .then((deletedCard) => res.status(OK).send(deletedCard))
-            .catch((err) => res.status(404).send({ error: err.message }));
+            .catch(() => next(new BadRequestError('Некорректно передан id')));
         }
         return null;
       });
-    return res.status(FORBIDDEN).send({ error: 'Нет доступа' });
+    return next(new ForbiddenError('Нет доступа'));
   } catch (err) {
     if (err.message === 'Not Found') {
-      const error = new Error('Запрашиваемая карточка не найдена');
-      error.statusCode = NOT_FOUND;
-      next(error);
+      return next(new NotFoundError('Запрашиваемая карточка не найдена'));
     }
     if (err.name === 'CastError') {
-      const error = new Error('Некорректно передан id');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      return next(new BadRequestError('Некорректно передан id'));
     }
   }
   return null;
@@ -67,16 +62,14 @@ module.exports.likeCard = async (req, res, next) => {
     res.status(OK).send(card);
   } catch (err) {
     if (err.message === 'Not Found') {
-      const error = new Error('Запрашиваемая карточка не найдена');
-      error.statusCode = NOT_FOUND;
-      next(error);
+      return next(new NotFoundError('Запрашиваемая карточка не найдена'));
     }
     if (err.name === 'CastError') {
-      const error = new Error('Некорректно передан id');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      return next(new BadRequestError('Некорректно передан id'));
     }
+    next(err);
   }
+  return null;
 };
 
 module.exports.dislikeCard = async (req, res, next) => {
@@ -90,14 +83,12 @@ module.exports.dislikeCard = async (req, res, next) => {
     res.status(OK).send(card);
   } catch (err) {
     if (err.message === 'Not Found') {
-      const error = new Error('Запрашиваемая карточка не найдена');
-      error.statusCode = NOT_FOUND;
-      next(error);
+      return next(new NotFoundError('Запрашиваемая карточка не найдена'));
     }
     if (err.name === 'CastError') {
-      const error = new Error('Некорректно передан id');
-      error.statusCode = BAD_REQUEST;
-      next(error);
+      return next(new BadRequestError('Некорректно передан id'));
     }
+    next(err);
   }
+  return null;
 };

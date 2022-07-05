@@ -7,12 +7,13 @@ const {
   updateUserAvatar,
   getUser,
 } = require('../controllers/users');
+const { REGEX_ID, REGEX_URL } = require('../utils/utils');
 
 router.get('/', getUsers);
 router.get('/me', getUser);
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
+    userId: REGEX_ID,
   }),
   headers: Joi.object().keys({
     authoriation: Joi.string(),
@@ -26,7 +27,7 @@ router.patch('/me', celebrate({
 }), updateUserInfo);
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().regex(/(https?:\/\/|ftps?:\/\/|www\.)((?![.,?!;:()]*(\s|$))[^\s]){2,}/),
+    avatar: REGEX_URL,
   }),
 }), updateUserAvatar);
 
