@@ -11,4 +11,4 @@ module.exports.ERROR = 500;
 
 module.exports.REGEX_ID = Joi.string().regex(/\d[a-f]/).length(24);
 
-module.exports.REGEX_URL = Joi.string().required().regex(/(https?:\/\/|ftps?:\/\/|www\.)((?![.,?!;:()]*(\s|$))[^\s]){2,}/);
+module.exports.REGEX_URL = Joi.string().regex(/(https?:\/\/|ftps?:\/\/|www\.)((?![.,?!;:()]*(\s|$))[^\s]){2,}/);
