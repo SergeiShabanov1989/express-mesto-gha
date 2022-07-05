@@ -10,7 +10,14 @@ const {
 
 router.get('/', getUsers);
 router.get('/me', getUser);
-router.get('/:userId', getUserById);
+router.get('/:userId', celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().alphanum().length(24),
+  }),
+  headers: Joi.object().keys({
+    authoriation: Joi.string(),
+  }).unknown(true),
+}), getUserById);
 router.patch('/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
@@ -19,7 +26,7 @@ router.patch('/me', celebrate({
 }), updateUserInfo);
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required(),
+    avatar: Joi.string().required().regex(/(https?:\/\/|ftps?:\/\/|www\.)((?![.,?!;:()]*(\s|$))[^\s]){2,}/),
   }),
 }), updateUserAvatar);
 
