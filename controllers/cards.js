@@ -7,15 +7,6 @@ const {
   FORBIDDEN,
 } = require('../utils/utils');
 
-// module.exports.getCards = async (req, res) => {
-//   try {
-//     const cards = await Card.find({});
-//     res.status(OK).send(cards);
-//   } catch (err) {
-//     res.status(ERROR).send({ message: 'Ошибка по умолчанию' });
-//   }
-// };
-
 module.exports.getCards = async (req, res) => {
   const cards = await Card.find({});
   res.status(OK).send(cards);
