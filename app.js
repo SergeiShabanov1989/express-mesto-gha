@@ -18,8 +18,8 @@ const app = express();
 const options = {
   origin: [
     'http://localhost:3000',
-    'https://ваш-домен',
-    'https://your-name-of.github.io',
+    'https://mesto.sergei-shabanov.nomoredomains.xyz',
+    'https://github.com/SergeiShabanov1989',
   ]
 };
 
