@@ -9,6 +9,7 @@ const { REGEX_URL } = require('./utils/utils');
 const NotFoundError = require('./errors/not-found-err');
 
 const { login, createUser } = require('./controllers/users');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
 
 const { PORT = 3001 } = process.env;
@@ -26,6 +27,8 @@ app.use('*', cors(options));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -62,6 +65,8 @@ async function main() {
 }
 
 main();
+
+app.use(errorLogger);
 
 app.use(errors());
 /* eslint-disable */
