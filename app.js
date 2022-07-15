@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
+const cors = require('cors');
 const { ERROR } = require('./utils/utils');
 const { REGEX_URL } = require('./utils/utils');
 const NotFoundError = require('./errors/not-found-err');
@@ -10,8 +11,18 @@ const NotFoundError = require('./errors/not-found-err');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 const app = express();
+
+const options = {
+  origin: [
+    'http://localhost:3000',
+    'https://ваш-домен',
+    'https://your-name-of.github.io',
+  ]
+};
+
+app.use('*', cors(options));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
